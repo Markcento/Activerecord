@@ -1,0 +1,149 @@
+Story:
+
+As a programmer, I can create a new Task record with a title, which is a string, and description, which is a string.
+
+Story:
+As a programmer, I can list all Task records.
+
+Story:
+As a programmer, I can set a Task record to done given the ID of the record.
+****
+ActiveRecord::Migration.add_column :records, :done, :boolean
+***** => MUST EXIT CONSOLE, RAKE DB:MIGRATE, AND REENTER CONSOLE*****
+
+c = Record.new(title:'Buy clothes',description:'Go to Mall',done:true)
+ => #<Record id: nil, title: "Buy clothes", description: "Go to Mall", created_at: nil, updated_at: nil, done: true>
+
+ c.save
+
+
+Story:
+As a programmer, I can list all the records that are done.
+
+Record.where(done:true)
+
+
+Story:
+As a programmer, I can list all the records that are not done.
+
+Record.where(done:false)
+
+
+Story:
+As a programmer, I can update the title and description of a Task record given the ID of the record.
+
+ z = Record.find(1)
+z.update_attribute :done, false
+
+
+Story:
+As a programmer, I can destroy a Task record given the ID of the record.
+
+Record.find(1).destroy
+
+Story:
+As a programmer, I can set a Task record with a due date, which is a timestamp.
+
+ActiveRecord::Migration.add_column :records, :due_date, :timestamp
+
+Story:
+As a programmer, I can list all the records with a due date.
+
+ *add var with a due date
+Record.where.not(due_date: [nil,""])
+
+Story:
+As a programmer, I can list all the records with a due date today.
+
+**add var with today's date
+Record.where(due_date:'2017-07-07 00:00:00')
+
+Story:
+As a programmer, I can list all the records without a due date.
+
+Record.where(due_date: [nil,""])
+
+Story:
+As a programmer, I can add multiple comments to a Task record. Comments should have a content field, which is a string.
+Hint: A Task has many Comments.
+
+
+
+
+
+learn03:task learn$ rails g model Person name
+Running via Spring preloader in process 28961
+      invoke  active_record
+      create    db/migrate/20170707231336_create_people.rb
+      create    app/models/person.rb
+learn03:task learn$ rails g model Dog name person:references
+Running via Spring preloader in process 28966
+      invoke  active_record
+      create    db/migrate/20170707231358_create_dogs.rb
+      create    app/models/dog.rb
+learn03:task learn$ rake db:migrate
+== 20170707231336 CreatePeople: migrating =====================================
+-- create_table(:people)
+   -> 0.0020s
+== 20170707231336 CreatePeople: migrated (0.0021s) ============================
+
+== 20170707231358 CreateDogs: migrating =======================================
+-- create_table(:dogs)
+   -> 0.0038s
+== 20170707231358 CreateDogs: migrated (0.0039s) ==============================
+
+learn03:task learn$ rails c
+Running via Spring preloader in process 28991
+Loading development environment (Rails 5.1.2)
+cannot load such file -- irbtools
+2.3.1 :001 > a = Person.new(name: 'Me')
+ => #<Person id: nil, name: "Me", created_at: nil, updated_at: nil>
+2.3.1 :002 > b = Dog.new(name: 'rex')
+ => #<Dog id: nil, name: "rex", person_id: nil, created_at: nil, updated_at: nil>
+2.3.1 :003 > a.dogs << b
+ => #<ActiveRecord::Associations::CollectionProxy [#<Dog id: nil, name: "rex", person_id: nil, created_at: nil, updated_at: nil>]>
+2.3.1 :004 > a.dogs
+ => #<ActiveRecord::Associations::CollectionProxy [#<Dog id: nil, name: "rex", person_id: nil, created_at: nil, updated_at: nil>]>
+2.3.1 :005 > a.save
+   (0.1ms)  begin transaction
+  SQL (1.4ms)  INSERT INTO "people" ("name", "created_at", "updated_at") VALUES (?, ?, ?)  [["name", "Me"], ["created_at", "2017-07-07 23:15:37.008274"], ["updated_at", "2017-07-07 23:15:37.008274"]]
+  SQL (0.3ms)  INSERT INTO "dogs" ("name", "person_id", "created_at", "updated_at") VALUES (?, ?, ?, ?)  [["name", "rex"], ["person_id", 1], ["created_at", "2017-07-07 23:15:37.012166"], ["updated_at", "2017-07-07 23:15:37.012166"]]
+   (1.1ms)  commit transaction
+ => true
+2.3.1 :006 > b.save
+   (0.1ms)  begin transaction
+   (0.0ms)  commit transaction
+ => true
+2.3.1 :007 > Person.all
+  Person Load (0.3ms)  SELECT  "people".* FROM "people" LIMIT ?  [["LIMIT", 11]]
+ => #<ActiveRecord::Relation [#<Person id: 1, name: "Me", created_at: "2017-07-07 23:15:37", updated_at: "2017-07-07 23:15:37">]>
+2.3.1 :008 > Dog.all
+  Dog Load (0.2ms)  SELECT  "dogs".* FROM "dogs" LIMIT ?  [["LIMIT", 11]]
+ => #<ActiveRecord::Relation [#<Dog id: 1, name: "rex", person_id: 1, created_at: "2017-07-07 23:15:37", updated_at: "2017-07-07 23:15:37">]>
+2.3.1 :009 > Person.all.dogs
+NoMethodError:   Person Load (0.2ms)  SELECT  "people".* FROM "people" LIMIT ?  [["LIMIT", 11]]
+undefined method `dogs' for #<Person::ActiveRecord_Relation:0x007fb17588b0e8>
+	from (irb):9
+2.3.1 :010 > Person.dogs.a;;
+2.3.1 :011 >   ^C
+2.3.1 :011 > Person.dogs.all
+NoMethodError: undefined method `dogs' for #<Class:0x007fb1760420e8>
+	from (irb):11
+2.3.1 :012 > Person.find(1).dogs
+  Person Load (0.2ms)  SELECT  "people".* FROM "people" WHERE "people"."id" = ? LIMIT ?  [["id", 1], ["LIMIT", 1]]
+  Dog Load (0.2ms)  SELECT  "dogs".* FROM "dogs" WHERE "dogs"."person_id" = ? LIMIT ?  [["person_id", 1], ["LIMIT", 11]]
+ => #<ActiveRecord::Associations::CollectionProxy [#<Dog id: 1, name: "rex", person_id: 1, created_at: "2017-07-07 23:15:37", updated_at: "2017-07-07 23:15:37">]>
+2.3.1 :013 > Person.all.dogs.name
+NoMethodError:   Person Load (0.2ms)  SELECT  "people".* FROM "people" LIMIT ?  [["LIMIT", 11]]
+undefined method `dogs' for #<Person::ActiveRecord_Relation:0x007fb171fc0510>
+	from (irb):13
+2.3.1 :014 > Person.dogs.name
+NoMethodError: undefined method `dogs' for #<Class:0x007fb1760420e8>
+	from (irb):14
+2.3.1 :015 > Person.find(1).dogs.name
+  Person Load (0.1ms)  SELECT  "people".* FROM "people" WHERE "people"."id" = ? LIMIT ?  [["id", 1], ["LIMIT", 1]]
+ => "Dog"
+2.3.1 :016 > Dog.find(1)
+  Dog Load (0.2ms)  SELECT  "dogs".* FROM "dogs" WHERE "dogs"."id" = ? LIMIT ?  [["id", 1], ["LIMIT", 1]]
+ => #<Dog id: 1, name: "rex", person_id: 1, created_at: "2017-07-07 23:15:37", updated_at: "2017-07-07 23:15:37">
+2.3.1 :017 >
